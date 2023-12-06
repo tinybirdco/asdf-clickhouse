@@ -24,15 +24,39 @@ sort_versions() {
 		LC_ALL=C sort -t. -k 1,1 -k 2,2n -k 3,3n -k 4,4n -k 5,5n | awk '{print $2}'
 }
 
+trim_version_suffix() {
+	local version="$1"
+
+	trimmed_lts="${version%-lts}"
+	trimmed_prestable="${trimmed_lts%-prestable}"
+	trimmed_stable="${trimmed_prestable%-stable}"
+
+	echo "${trimmed_stable}"
+}
+
+get_arch() {
+	arch=$(uname -m)
+
+	case "$arch" in
+	"x86_64" | "amd64")
+		echo "amd64"
+		;;
+	"aarch64" | "arm64")
+		echo "arm64"
+		;;
+	*)
+		fail "Unknown architecture: $arch. Aborting."
+		;;
+	esac
+}
+
 list_github_tags() {
 	git ls-remote --tags --refs "$GH_REPO" |
 		grep -o 'refs/tags/.*' | cut -d/ -f3- |
-		sed 's/^v//' # NOTE: You might want to adapt this sed to remove non-version strings from tags
+		sed 's/^v//' | grep --color=never -E 'lts|stable'
 }
 
 list_all_versions() {
-	# TODO: Adapt this. By default we simply list the tag names from GitHub releases.
-	# Change this function if clickhouse has other means of determining installable versions.
 	list_github_tags
 }
 
@@ -41,8 +65,21 @@ download_release() {
 	version="$1"
 	filename="$2"
 
-	# TODO: Adapt the release URL convention for clickhouse
-	url="$GH_REPO/releases/download/v23.10.5.20-stable/clickhouse-common-static-23.10.5.20-amd64.tgz"
+	platform=$(uname -s)
+	case "$platform" in
+	"Linux")
+		url="$GH_REPO/releases/download/v$version/clickhouse-common-static-$(trim_version_suffix "$version")-$(get_arch).tgz"
+		;;
+	"Darwin")
+		arch=$(get_arch)
+		url="$GH_REPO/releases/download/v$version/clickhouse-macos"
+		[ "$arch" == "arm64" ] && url+="-aarch64"
+		;;
+	*)
+		fail "Unknown platform: $platform"
+		;;
+	esac
+
 	echo "* Downloading $TOOL_NAME release $version..."
 	curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
 }
