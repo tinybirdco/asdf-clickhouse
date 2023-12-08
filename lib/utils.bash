@@ -60,31 +60,30 @@ list_all_versions() {
 	list_github_tags
 }
 
-download_release() {
+download_release_linux() {
 	local version filename url
 	version="$1"
 	filename="$2"
 
-	platform=$(uname -s)
-	case "$platform" in
-	"Linux")
-		url="$GH_REPO/releases/download/v$version/clickhouse-common-static-$(trim_version_suffix "$version")-$(get_arch).tgz"
-		;;
-	"Darwin")
-		arch=$(get_arch)
-		url="$GH_REPO/releases/download/v$version/clickhouse-macos"
-		[ "$arch" == "arm64" ] && url+="-aarch64"
-		;;
-	*)
-		fail "Unknown platform: $platform"
-		;;
-	esac
-
+	url="$GH_REPO/releases/download/v$version/clickhouse-common-static-$(trim_version_suffix "$version")-$(get_arch).tgz"
 	echo "* Downloading $TOOL_NAME release $version..."
 	curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
 }
 
-install_version() {
+download_release_mac() {
+	local version filename url
+	version="$1"
+	filename="$2"
+
+	arch=$(get_arch)
+	url="$GH_REPO/releases/download/v$version/clickhouse-macos"
+	[ "$arch" == "arm64" ] && url+="-aarch64"
+	echo "$filename"
+	echo "* Downloading $TOOL_NAME release $version..."
+	curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
+}
+
+install_version_linux() {
 	local install_type="$1"
 	local version="$2"
 	local install_path="${3%/bin}/bin"
@@ -103,6 +102,32 @@ install_version() {
 
 		mv "$install_path/usr/bin/$tool_cmd" "$install_path"
 		rm -rf "${install_path:?}/usr" "${install_path:?}/install"
+
+		echo "$TOOL_NAME $version installation was successful!"
+	) || (
+		rm -rf "$install_path"
+		fail "An error occurred while installing $TOOL_NAME $version."
+	)
+}
+
+install_version_mac() {
+	local install_type="$1"
+	local version="$2"
+	local install_path="${3%/bin}/bin"
+
+	if [ "$install_type" != "version" ]; then
+		fail "asdf-$TOOL_NAME supports release installs only"
+	fi
+
+	(
+		mkdir -p "$install_path"
+		cp -r "$ASDF_DOWNLOAD_PATH/clickhouse-$ASDF_INSTALL_VERSION" "$install_path"
+		local tool_cmd
+		tool_cmd="$(echo "$TOOL_TEST" | cut -d' ' -f1)"
+		chmod +x "$install_path/$tool_cmd-$version"
+		test -x "$install_path/$tool_cmd-$version" || fail "Expected $install_path/$tool_cmd-$version to be executable."
+
+		mv "$install_path/$tool_cmd-$version" "$install_path/clickhouse"
 
 		echo "$TOOL_NAME $version installation was successful!"
 	) || (

@@ -8,4 +8,16 @@ plugin_dir=$(dirname "$(dirname "$current_script_path")")
 # shellcheck source=./lib/utils.bash
 source "${plugin_dir}/lib/utils.bash"
 
-install_version "$ASDF_INSTALL_TYPE" "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH"
+platform=$(uname -s)
+case "$platform" in
+"Linux")
+	install_version_linux "$ASDF_INSTALL_TYPE" "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH"
+	;;
+"Darwin")
+	echo "install!"
+	install_version_mac "$ASDF_INSTALL_TYPE" "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH"
+	;;
+*)
+	fail "Unknown platform: $platform"
+	;;
+esac
