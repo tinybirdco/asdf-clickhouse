@@ -1,6 +1,6 @@
 <div align="center">
 
-# asdf-clickhouse [![Build](https://github.com/Coolomina/asdf-clickhouse/actions/workflows/build.yml/badge.svg)](https://github.com/Coolomina/asdf-clickhouse/actions/workflows/build.yml) [![Lint](https://github.com/Coolomina/asdf-clickhouse/actions/workflows/lint.yml/badge.svg)](https://github.com/Coolomina/asdf-clickhouse/actions/workflows/lint.yml)
+# asdf-clickhouse [![Build](https://github.com/tinybirdco/asdf-clickhouse/actions/workflows/build.yml/badge.svg)](https://github.com/tinybirdco/asdf-clickhouse/actions/workflows/build.yml) [![Lint](https://github.com/tinybirdco/asdf-clickhouse/actions/workflows/lint.yml/badge.svg)](https://github.com/tinybirdco/asdf-clickhouse/actions/workflows/lint.yml)
 
 [ClickHouse](https://clickhouse.com/docs) plugin for the [asdf version manager](https://asdf-vm.com).
 
@@ -22,7 +22,7 @@
 Plugin:
 
 ```shell
-asdf plugin add clickhouse https://github.com/Coolomina/asdf-clickhouse.git
+asdf plugin add clickhouse https://github.com/tinybirdco/asdf-clickhouse.git
 ```
 
 clickhouse:
@@ -51,8 +51,8 @@ install & manage versions.
 
 Contributions of any kind welcome! See the [contributing guide](contributing.md).
 
-[Thanks goes to these contributors](https://github.com/Coolomina/asdf-clickhouse/graphs/contributors)!
+[Thanks goes to these contributors](https://github.com/tinybirdco/asdf-clickhouse/graphs/contributors)!
 
 # License
 
-See [LICENSE](LICENSE) © [Alejandro Colomina](https://github.com/Coolomina/)
+See [LICENSE](LICENSE) © [Tinybird Co.](https://github.com/tinybirdco)
